@@ -20,6 +20,7 @@ package generator
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/pquerna/ffjson/shared"
 	"os"
@@ -27,6 +28,8 @@ import (
 	"path/filepath"
 	"text/template"
 )
+
+var defaultPackageName = flag.String("package", "", "set the package name")
 
 const inceptionMainTemplate = `
 // DO NOT EDIT!
@@ -99,11 +102,15 @@ func getImportName(inputPath string) (string, error) {
 
 func (im *InceptionMain) Generate(packageName string, si []*StructInfo) error {
 	var err error
+	var importName string
 
-	importName, err := getImportName(im.inputPath)
-
-	if err != nil {
-		return nil
+	if *defaultPackageName == "" {
+		importName, err = getImportName(im.inputPath)
+		if err != nil {
+			return err
+		}
+	} else {
+		importName = *defaultPackageName
 	}
 
 	// for `go run` to work, we must have a file ending in ".go".
